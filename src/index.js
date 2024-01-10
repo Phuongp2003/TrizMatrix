@@ -2,6 +2,10 @@
 const path = require('path');
 const express = require('express');
 const xlsx = require('node-xlsx');
+const db = require('./util/database');
+
+const data = db.run('imps', { "ID": 3 }).catch(console.dir);
+console.log(data);
 
 // setup
 const app = express();
@@ -74,6 +78,8 @@ app.post('/get-answers', (req, res) => {
 });
 
 // listen
+// mongodbConnect(() => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 })
+// })

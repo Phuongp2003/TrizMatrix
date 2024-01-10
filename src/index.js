@@ -95,7 +95,6 @@ async function main() {
             const listStr = await db.run('matrix', { goodOption: parseInt(req.body.goodOption), badOption: parseInt(req.body.badOption) }).catch(console.dir);
             const list = listStr[0].data + '';
             const test_arr = list.split(',').map(Number);
-            console.log(test_arr);
             for (let index = 0; index < test_arr.length; index++) {
                 let element = test_arr[index];
                 if (element == 90) {

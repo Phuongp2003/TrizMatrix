@@ -18,6 +18,7 @@ async function run(tableName, queryCommand) {
         const filter = queryCommand;
         const document = await col.find(filter).toArray();
         // console.log("Document found:\n" + JSON.stringify(document));
+        return document; // Return the document
     } catch (err) {
         console.log(err.stack);
     }

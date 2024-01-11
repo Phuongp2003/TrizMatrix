@@ -92,12 +92,11 @@ async function main() {
         const rulename = [];
         const rule_content = [];
         if (req.body.goodOption != 0 && req.body.badOption != 0) {
-            const rowData = await db.runOne('matrix_byGoodOption', { _id: req.body.goodOption }).catch(console.dir);
-            const list = rowData.pros.find(item => item && item.ID === req.body.badOption).data;
+            const rowData = await db.runOne('matrix', { _id: req.body.goodOption }).catch(console.dir);
+            const list = rowData.pros.find(item => item && item._id === req.body.badOption).data;
             const test_arr = list.split(',').map(Number);
             for (let index = 0; index < test_arr.length; index++) {
                 let element = test_arr[index];
-                console.log(element);
                 if (element == 90) {
                     element = 41;
                 } else if (element == 99) {

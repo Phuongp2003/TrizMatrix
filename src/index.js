@@ -18,10 +18,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
 
 class Rule {
-    constructor(id, name, detail) {
+    constructor(id, name, content) {
         this.id = id;
         this.name = name;
-        this.detail = detail;
+        this.content = content;
     }
     getId() {
         return this.id;
@@ -35,48 +35,48 @@ class Rule {
         return this.id + '. ' + this.name;
     }
 
-    getDetail() {
-        return this.detail;
+    getContent() {
+        return this.content;
     }
 }
 
 class Metric {
-    constructor(id, name) {
+    constructor(id, value) {
         this.id = id;
-        this.name = name;
+        this.value = value;
     }
     getId() {
         return this.id;
     }
 
-    getName() {
-        return this.name;
+    getValue() {
+        return this.value;
     }
 }
 
 async function main() {
-    let data_imps = await db.run('imps', {}).catch(console.dir);
-
+    let data_imps = await db.run('improvements', {}).catch(console.dir);
     let ruleList = [];
     let rule_name = [];
-    let rule_detail = [];
+    let content = [];
     for (let i = 0; i < data_imps.length; i++) {
-        let result = new Rule(data_imps[i].ID, data_imps[i].rule_name, data_imps[i].rule_detail);
+        let result = new Rule(data_imps[i]._id, data_imps[i].rule_name, data_imps[i].content);
         rule_name.push(result.getFullName());
-        rule_detail.push(result.getDetail());
+        content.push(result.getContent());
         ruleList.push(result);
     }
-    // console.log(rule_name);
 
 
     let data_metrics = await db.run('metrics', {}).catch(console.dir);
+    // console.log(data_metrics);
     let metricList = [];
     let opNameList = [];
     for (let i = 0; i < data_metrics.length; i++) {
-        let result = new Metric(data_metrics[i].ID, data_metrics[i].detail);
-        opNameList.push(result.name);
+        let result = new Metric(data_metrics[i]._id, data_metrics[i].value);
+        opNameList.push(result.getValue());
         metricList.push(result);
     }
+    // console.log(opNameList);
 
     // routes
     app.locals.opt1 = 1; // max option, default = 1
@@ -90,30 +90,31 @@ async function main() {
     app.post('/get-answers', async (req, res) => {
 
         const rulename = [];
-        const ruledetail = [];
+        const rule_content = [];
         if (req.body.goodOption != 0 && req.body.badOption != 0) {
-            const listStr = await db.run('matrix', { goodOption: parseInt(req.body.goodOption), badOption: parseInt(req.body.badOption) }).catch(console.dir);
-            const list = listStr[0].data + '';
+            const rowData = await db.runOne('matrix_byGoodOption', { _id: req.body.goodOption }).catch(console.dir);
+            const list = rowData.pros.find(item => item && item.ID === req.body.badOption).data;
             const test_arr = list.split(',').map(Number);
             for (let index = 0; index < test_arr.length; index++) {
                 let element = test_arr[index];
+                console.log(element);
                 if (element == 90) {
                     element = 41;
                 } else if (element == 99) {
                     element = 42;
                 }
                 const data_des_name = rule_name[element - 1];
-                const data_des_deitail = rule_detail[element - 1];
+                const data_des_deitail = content[element - 1];
                 rulename.push(data_des_name);
-                ruledetail.push(data_des_deitail);
+                rule_content.push(data_des_deitail);
             }
         } else {
             rulename.push('Vui lòng chọn tùy chọn');
         }
 
         app.locals.rule_name = rulename;
-        app.locals.rule_detail = ruledetail;
-        res.render('include/answers.ejs', { rulename, ruledetail });
+        app.locals.content = rule_content;
+        res.render('include/answers.ejs', { rulename, rule_content });
     });
 
     app.listen(port, () => {

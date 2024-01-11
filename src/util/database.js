@@ -27,4 +27,24 @@ async function run(tableName, queryCommand) {
     }
 }
 
-module.exports = { run };
+async function runOne(tableName, queryCommand) {
+    try {
+        // Connect to the Atlas cluster
+        await client.connect();
+        const db = client.db(dbName);
+        // Reference the "people" collection in the specified database
+        const col = db.collection(tableName);
+        // Find and return the document
+        const filter = queryCommand;
+        const document = await col.findOne(filter);
+        // console.log("Document found:\n" + JSON.stringify(document));
+        return document; // Return the document
+    } catch (err) {
+        console.log(err.stack);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+module.exports = { run, runOne };
